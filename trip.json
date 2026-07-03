@@ -1,5 +1,5 @@
 {
-  "version": 1783083815330,
+  "version": 1783088942220,
   "title": "Ireland & Scotland",
   "subtitle": "A 17-day family journey · July 2026",
   "meta": "Dublin — Wild Atlantic Way — Scotland",
@@ -56,6 +56,11 @@
             "time": "2:30p",
             "text": "Book of Kells",
             "status": "booked"
+          },
+          {
+            "text": "The Bailey",
+            "status": "plan",
+            "time": "3:30"
           }
         ],
         "dinner": [

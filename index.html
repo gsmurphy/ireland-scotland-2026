@@ -41,8 +41,12 @@
   .tools button{font-family:inherit;font-size:.82rem;padding:7px 13px;border:1px solid var(--rule);
     background:var(--card);color:#5f5540;cursor:pointer;border-radius:7px}
   .tools button:hover{background:#fff}
+  .tools button:disabled{opacity:.45;cursor:default}
   #editBtn.on{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:bold}
-  .badge{font-size:.72rem;color:var(--rust);white-space:nowrap}
+  #saveBtn.hot{background:var(--moss);color:#fff;border-color:var(--moss);font-weight:bold}
+  #connBtn.on{background:#eef4ee;border-color:var(--moss);color:var(--moss)}
+  .status{font-size:.72rem;color:#8a7f68;white-space:nowrap}
+  .status.unsaved{color:var(--rust);font-weight:bold}
   .view{display:none} .view.active{display:block}
 
   /* edit hint bar */
@@ -50,6 +54,13 @@
     background:#fbf4e2;border:1px solid var(--gold);border-radius:8px;
     font-size:.78rem;color:#7a5f22;text-align:center}
   body.editing .edit-hint{display:block}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(10px);
+    background:var(--ink);color:#f6f1e7;padding:10px 16px;border-radius:8px;font-size:.85rem;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .25s,transform .25s;
+    z-index:60;max-width:90%;text-align:center;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   /* flight banner */
   .flight-banner{background:var(--slate);color:#f6f1e7;margin:20px 0 8px;padding:13px 20px;
@@ -171,15 +182,17 @@
     <button id="tab-cal" onclick="showView('cal')">Calendar</button>
   </div>
   <div class="tools">
-    <span id="localBadge" class="badge" hidden>● Local edits (not yet exported)</span>
+    <span id="syncStatus" class="status"></span>
     <button id="editBtn" onclick="toggleEdit()">✎ Edit</button>
-    <button onclick="exportHTML()" title="Download an HTML file with your edits baked in">⤓ Export</button>
+    <button id="saveBtn" onclick="saveToGitHub()" title="Publish your edits to everyone" disabled>💾 Save</button>
+    <button id="connBtn" onclick="connectGitHub()" title="Connect a GitHub token so you can publish">☁ Connect</button>
+    <button onclick="exportHTML()" title="Download an offline copy with your edits baked in">⤓ Export</button>
     <button onclick="resetTrip()" title="Discard local edits, reload published version">↺ Reset</button>
   </div>
 </div>
 
 <div class="edit-hint">
-  Editing on — tap any entry text or time to change it · use the dropdown to set its colour/status · <b>×</b> removes an item · <b>+ add item</b> adds one. Changes save on this device automatically; use <b>Export</b> to publish them to all devices.
+  Editing on — tap any entry text or time to change it · use the dropdown to set its colour/status · <b>×</b> removes an item · <b>+ add item</b> adds one. Tap <b>💾 Save</b> to publish to everyone (needs <b>☁ Connect</b> once).
 </div>
 
 <div id="view-days" class="view active">
@@ -202,6 +215,7 @@
 </div>
 
 <footer id="footer-note"></footer>
+<div id="toast" class="toast" hidden></div>
 
 <script id="trip-data" type="application/json">
 {
@@ -814,7 +828,15 @@
 <script>
 
 "use strict";
-const KEY = "trip-ireland-scotland-2026";
+/* ---- config: where the shared document lives ---- */
+const OWNER = "gsmurphy";
+const REPO  = "ireland-scotland-2026";
+const FILE  = "trip.json";
+const BRANCH = "main";
+const KEY  = "trip-ireland-scotland-2026";   // localStorage: {base, trip}
+const TKEY = "gh-token-ireland-scotland";     // localStorage: shared write token
+const POLL_MS = 60000;
+
 const SEGS = [
   {key:"morning",   label:"Morning",   range:"8–11a", abbr:"M"},
   {key:"lunch",     label:"Lunch",     range:"11–1",  abbr:"L"},
@@ -831,9 +853,15 @@ const STATUSES = [
 ];
 const PRIORITY = {tobook:4, booked:3, class:2, plan:1, open:0};
 
-let trip;
+let base;   // published snapshot our working copy derives from
+let trip;   // working copy (rendered + edited)
+let token = "";
 let saveTimer;
+let toastTimer;
+let fieldFocused = false;
+let pendingRemote = null;
 
+const clone = (o) => JSON.parse(JSON.stringify(o));
 function el(tag, cls, text){
   const n = document.createElement(tag);
   if(cls) n.className = cls;
@@ -841,37 +869,182 @@ function el(tag, cls, text){
   return n;
 }
 
-/* ---------- load / persist ---------- */
-function loadTrip(){
-  const embedded = JSON.parse(document.getElementById("trip-data").textContent);
-  let chosen = embedded, fromLocal = false;
+/* ---------- load / persist / status ---------- */
+function seedTrip(){ return JSON.parse(document.getElementById("trip-data").textContent); }
+function loadLocal(){
+  const seed = seedTrip();
   try{
     const raw = localStorage.getItem(KEY);
     if(raw){
-      const saved = JSON.parse(raw);
-      if((saved.version||0) >= (embedded.version||0)){
-        chosen = saved;
-        fromLocal = (saved.version||0) > (embedded.version||0);
-      }
-    }
-  }catch(err){ /* ignore corrupt storage */ }
-  trip = chosen;
-  showBadge(fromLocal);
+      const s = JSON.parse(raw);
+      if(s && s.trip){ base = s.base || seed; trip = s.trip; }
+      else if(s && s.days){ base = clone(seed); trip = s; }   // migrate old format
+      else { base = seed; trip = clone(seed); }
+    } else { base = seed; trip = clone(seed); }
+  }catch(err){ base = seed; trip = clone(seed); }
+  token = localStorage.getItem(TKEY) || "";
 }
 function persist(){
-  try{ localStorage.setItem(KEY, JSON.stringify(trip)); }catch(err){}
+  try{ localStorage.setItem(KEY, JSON.stringify({base, trip})); }catch(err){}
 }
-/* called on any edit: stamp version, resync calendar, badge, debounce-save */
+function isDirty(){ return JSON.stringify(base) !== JSON.stringify(trip); }
 function touch(){
   trip.version = Date.now();
   renderCalendar();
-  showBadge(true);
+  updateStatus();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(persist, 300);
 }
-function showBadge(on){
-  const b = document.getElementById("localBadge");
-  if(b) b.hidden = !on;
+function updateStatus(){
+  const dirty = isDirty();
+  const s = document.getElementById("syncStatus");
+  const save = document.getElementById("saveBtn");
+  const conn = document.getElementById("connBtn");
+  conn.textContent = token ? "☁ Connected" : "☁ Connect";
+  conn.classList.toggle("on", !!token);
+  save.disabled = !dirty;
+  save.classList.toggle("hot", dirty && !!token);
+  if(dirty){ s.textContent = token ? "● Unsaved — tap Save" : "● Unsaved (Connect to publish)"; s.className = "status unsaved"; }
+  else { s.textContent = token ? "✓ Synced" : "Viewing latest"; s.className = "status"; }
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.hidden = false;
+  requestAnimationFrame(() => t.classList.add("show"));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove("show"); setTimeout(() => { t.hidden = true; }, 300); }, 3400);
+}
+
+/* ---------- base64 <-> utf8 ---------- */
+function b64ToStr(b64){
+  const bin = atob(String(b64).replace(/\s/g,""));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+function strToB64(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+
+/* ---------- merge: keep my touched segments, adopt theirs elsewhere ---------- */
+function byDate(days){ const m = {}; days.forEach(d => { m[d.dateNum] = d; }); return m; }
+function mergeSegments(baseT, mineT, theirsT){
+  const merged = clone(theirsT);
+  const conflicts = [];
+  const bMap = byDate(baseT.days), mMap = byDate(mineT.days);
+  merged.days.forEach(day => {
+    const b = bMap[day.dateNum], m = mMap[day.dateNum];
+    if(!b || !m) return;
+    SEGS.forEach(seg => {
+      const bs = JSON.stringify(b.segments[seg.key] || []);
+      const ms = JSON.stringify(m.segments[seg.key] || []);
+      const ts = JSON.stringify(day.segments[seg.key] || []);
+      if(ms !== bs){                                  // I changed this slot -> keep mine
+        day.segments[seg.key] = clone(m.segments[seg.key] || []);
+        if(ts !== bs && ts !== ms) conflicts.push("Day " + (day.daynum || day.dateNum) + " " + seg.label);
+      }
+    });
+  });
+  return { merged, conflicts };
+}
+
+/* ---------- remote sync ---------- */
+async function refresh(){
+  try{
+    const r = await fetch(FILE + "?t=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) return;
+    applyRemote(await r.json());
+  }catch(err){ /* offline: keep local */ }
+}
+function applyRemote(remote){
+  if(!remote || typeof remote.version !== "number") return;
+  if(remote.version <= base.version) return;          // nothing newer than our baseline
+  if(fieldFocused){ pendingRemote = remote; return; } // don't yank a field mid-type
+  pendingRemote = null;
+  if(!isDirty()){
+    base = remote; trip = clone(remote);
+    persist(); renderDays(); renderCalendar(); updateStatus();
+    toast("Updated to the latest itinerary");
+  } else {
+    const { merged, conflicts } = mergeSegments(base, trip, remote);
+    trip = merged; base = remote;
+    persist(); renderDays(); renderCalendar(); updateStatus();
+    toast(conflicts.length
+      ? ("Merged others’ changes · kept yours on " + conflicts.length + " overlapping slot(s)")
+      : "Merged others’ changes · your unsaved edits kept");
+  }
+}
+
+/* ---------- GitHub write (editors only) ---------- */
+function ghHeaders(){
+  return { "Authorization": "Bearer " + token,
+           "Accept": "application/vnd.github+json",
+           "X-GitHub-Api-Version": "2022-11-28",
+           "Content-Type": "application/json" };
+}
+async function ghGet(){
+  const url = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/contents/" + FILE + "?ref=" + BRANCH + "&t=" + Date.now();
+  const r = await fetch(url, {headers: ghHeaders(), cache:"no-store"});
+  if(r.status === 404) return {data:null, sha:null};
+  if(r.status === 401) throw new Error("token rejected (expired or wrong) — reconnect");
+  if(!r.ok) throw new Error("read failed (HTTP " + r.status + ")");
+  const j = await r.json();
+  return {data: JSON.parse(b64ToStr(j.content)), sha: j.sha};
+}
+async function ghPut(obj, sha){
+  const url = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/contents/" + FILE;
+  const body = { message: "Update itinerary (via app)", content: strToB64(JSON.stringify(obj, null, 2) + "\n"), branch: BRANCH };
+  if(sha) body.sha = sha;
+  const r = await fetch(url, {method:"PUT", headers: ghHeaders(), body: JSON.stringify(body)});
+  if(r.status === 409) return {ok:false, conflict:true};
+  if(!r.ok){ let m; try{ m = (await r.json()).message; }catch(e){} throw new Error(m || ("HTTP " + r.status)); }
+  return {ok:true};
+}
+async function saveToGitHub(){
+  if(!token){ if(!connectGitHub()) return; }
+  if(!isDirty()){ toast("Nothing to save"); return; }
+  const save = document.getElementById("saveBtn");
+  save.disabled = true; save.textContent = "Saving…";
+  try{
+    let got = await ghGet();
+    let remote = got.data || base;
+    let { merged } = mergeSegments(base, trip, remote);
+    merged.version = Date.now();
+    let res = await ghPut(merged, got.sha);
+    if(res.conflict){                                  // someone committed between get & put
+      got = await ghGet(); remote = got.data || base;
+      ({ merged } = mergeSegments(base, trip, remote));
+      merged.version = Date.now();
+      res = await ghPut(merged, got.sha);
+      if(res.conflict) throw new Error("busy — another save landed first, try again");
+    }
+    base = clone(merged); trip = clone(merged);
+    persist(); renderDays(); renderCalendar();
+    toast("✓ Saved — everyone sees it within ~1 min");
+  }catch(err){
+    toast("Save failed: " + err.message);
+    alert("Save failed: " + err.message + "\n\nYour edits are still safe on this device. Try Save again, or tap ☁ to reconnect if your token expired.");
+  }finally{
+    save.textContent = "💾 Save";
+    updateStatus();
+  }
+}
+function connectGitHub(){
+  if(token){
+    if(confirm("Disconnect GitHub on this device? You can still view and edit; you just can’t publish until you reconnect.")){
+      token = ""; localStorage.removeItem(TKEY); updateStatus();
+    }
+    return false;
+  }
+  const t = prompt("Paste your fine-grained GitHub token (scoped to this repo · Contents: read/write).\nIt is stored only on this device, never published.");
+  if(t && t.trim()){
+    token = t.trim(); localStorage.setItem(TKEY, token); updateStatus();
+    toast("Connected — you can now publish with Save");
+    return true;
+  }
+  return false;
 }
 
 /* ---------- day view ---------- */
@@ -887,13 +1060,11 @@ function renderDays(){
 function renderDayCard(day, idx){
   const card = el("div","day");
   card.dataset.idx = idx;
-
   const head = el("div","day-head");
   head.append(el("span","daynum","Day "+day.daynum));
   head.append(el("span","date", day.dow+", Jul "+day.dateNum));
   head.append(el("span","place", day.place));
   card.append(head);
-
   const body = el("div","day-body");
   if(day.stay){
     const s = el("div","stay-line");
@@ -906,7 +1077,6 @@ function renderDayCard(day, idx){
     const lab = el("div","seglabel");
     lab.append(el("span","sl",seg.label), el("span","sr",seg.range));
     row.append(lab);
-
     const content = el("div","segcontent");
     const entries = day.segments[seg.key] || [];
     if(entries.length === 0){
@@ -919,7 +1089,6 @@ function renderDayCard(day, idx){
     const add = el("button","add-e","+ add item");
     add.addEventListener("click", () => addEntry(idx, seg.key));
     content.append(add);
-
     row.append(content);
     body.append(row);
   });
@@ -928,32 +1097,23 @@ function renderDayCard(day, idx){
 }
 function renderEntry(idx, segKey, entry, ei){
   const row = el("div","e "+entry.status);
-
   const tm = el("span","tm", entry.time || "");
   tm.dataset.role = "time";
   tm.addEventListener("input", () => { entry.time = tm.textContent.trim(); touch(); });
-
   const tx = el("span","etext", entry.text);
   tx.dataset.role = "text";
   tx.addEventListener("input", () => { entry.text = tx.textContent; touch(); });
-
   const sel = el("select","status-sel");
-  STATUSES.forEach(s => {
-    const o = el("option", null, s.label);
-    o.value = s.v;
-    if(s.v === entry.status) o.selected = true;
+  STATUSES.forEach(st => {
+    const o = el("option", null, st.label);
+    o.value = st.v;
+    if(st.v === entry.status) o.selected = true;
     sel.append(o);
   });
-  sel.addEventListener("change", () => {
-    entry.status = sel.value;
-    row.className = "e " + entry.status;
-    touch();
-  });
-
+  sel.addEventListener("change", () => { entry.status = sel.value; row.className = "e " + entry.status; touch(); });
   const del = el("button","del-e","×");
   del.title = "Remove item";
   del.addEventListener("click", () => removeEntry(idx, segKey, ei));
-
   row.append(tm, tx, sel, del);
   return row;
 }
@@ -961,15 +1121,12 @@ function addEntry(idx, segKey){
   trip.days[idx].segments[segKey].push({ text:"New item", status:"plan" });
   rerenderDay(idx);
   touch();
-  // focus the text of the item just added
   const card = document.querySelector('#day-cards .day[data-idx="'+idx+'"]');
-  const texts = card ? card.querySelectorAll('.segrow') : [];
-  // find the seg row for this segment and focus its last entry text
   const segIndex = SEGS.findIndex(s => s.key === segKey);
   const rowEl = card && card.querySelectorAll('.segrow')[segIndex];
   if(rowEl){
-    const entryTexts = rowEl.querySelectorAll('.etext');
-    const last = entryTexts[entryTexts.length - 1];
+    const texts = rowEl.querySelectorAll('.etext');
+    const last = texts[texts.length - 1];
     if(last){ last.focus(); selectAll(last); }
   }
 }
@@ -993,18 +1150,13 @@ function selectAll(node){
 
 /* ---------- calendar view ---------- */
 function topStatus(entries){
-  return entries.reduce((best, e) =>
-    PRIORITY[e.status] > PRIORITY[best] ? e.status : best, "open");
+  return entries.reduce((best, en) => PRIORITY[en.status] > PRIORITY[best] ? en.status : best, "open");
 }
-function calSlot(dateNum){                 // Jul 2 2026 = Thursday (col 4)
-  const n = 4 + (dateNum - 2);
-  return { row: Math.floor(n / 7), col: n % 7 };
-}
+function calSlot(dateNum){ const n = 4 + (dateNum - 2); return { row: Math.floor(n/7), col: n%7 }; }
 function renderCalendar(){
   const body = document.getElementById("cal-body");
   body.textContent = "";
-  const grid = {};
-  let maxRow = 0;
+  const grid = {}; let maxRow = 0;
   trip.days.forEach(day => {
     const {row, col} = calSlot(day.dateNum);
     (grid[row] = grid[row] || {})[col] = day;
@@ -1027,17 +1179,14 @@ function renderCalCell(day){
   td.append(dh);
   td.append(el("div","cell-loc", day.place));
   if(day.stay) td.append(el("div","cell-stay","🛏 "+day.stay.short));
-
   const segs = el("div","cell-segs");
   SEGS.forEach(seg => {
     const entries = day.segments[seg.key] || [];
-    if(day.calOnly && entries.length === 0) return;   // pre-day: only filled slots
+    if(day.calOnly && entries.length === 0) return;
     const status = entries.length ? topStatus(entries) : "open";
     const ms = el("div","ms "+status);
     ms.append(el("span","msl", seg.abbr));
-    const text = entries.length
-      ? entries.map(e => (e.time ? e.time+" " : "") + e.text).join(" · ")
-      : "—";
+    const text = entries.length ? entries.map(en => (en.time ? en.time+" " : "") + en.text).join(" · ") : "—";
     ms.append(el("span","mst", text));
     segs.append(ms);
   });
@@ -1048,9 +1197,7 @@ function renderCalCell(day){
 /* ---------- edit mode ---------- */
 function applyEditable(scope){
   const on = document.body.classList.contains("editing");
-  scope.querySelectorAll(".etext, .tm").forEach(n => {
-    n.contentEditable = on ? "true" : "false";
-  });
+  scope.querySelectorAll(".etext, .tm").forEach(n => { n.contentEditable = on ? "true" : "false"; });
 }
 function toggleEdit(){
   const on = !document.body.classList.contains("editing");
@@ -1076,37 +1223,39 @@ function resetTrip(){
   location.reload();
 }
 function exportHTML(){
-  trip.version = Date.now();
-  persist();
-  const clone = document.documentElement.cloneNode(true);
-  clone.querySelector("#trip-data").textContent = JSON.stringify(trip, null, 2);
-  // strip runtime state so a fresh open renders cleanly from the embedded data
-  const dc = clone.querySelector("#day-cards"); if(dc) dc.textContent = "";
-  const cb = clone.querySelector("#cal-body");  if(cb) cb.textContent = "";
-  clone.querySelector("body").classList.remove("editing");
-  const badge = clone.querySelector("#localBadge"); if(badge) badge.hidden = true;
-  const eb = clone.querySelector("#editBtn"); if(eb){ eb.classList.remove("on"); eb.textContent = "✎ Edit"; }
-  const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+  const snap = clone(trip); snap.version = Date.now();
+  const cloneDoc = document.documentElement.cloneNode(true);
+  cloneDoc.querySelector("#trip-data").textContent = JSON.stringify(snap, null, 2);
+  const dc = cloneDoc.querySelector("#day-cards"); if(dc) dc.textContent = "";
+  const cb = cloneDoc.querySelector("#cal-body");  if(cb) cb.textContent = "";
+  cloneDoc.querySelector("body").classList.remove("editing");
+  const html = "<!DOCTYPE html>\n" + cloneDoc.outerHTML;
   const blob = new Blob([html], {type:"text/html"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "ireland-scotland-itinerary.html";
-  document.body.append(a);
-  a.click();
-  a.remove();
+  a.href = url; a.download = "ireland-scotland-itinerary.html";
+  document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /* ---------- init ---------- */
 function init(){
-  loadTrip();
-  // fill static text from data
+  loadLocal();
   document.getElementById("flight-title").textContent = trip.flight.title;
   document.getElementById("flight-detail").textContent = trip.flight.detail;
   document.getElementById("footer-note").textContent = trip.footer;
   renderDays();
   renderCalendar();
+  updateStatus();
+  // track focus so a background refresh never interrupts typing
+  document.addEventListener("focusin",  e => { if(e.target.closest("#day-cards")) fieldFocused = true; });
+  document.addEventListener("focusout", e => {
+    if(e.target.closest("#day-cards")){ fieldFocused = false; if(pendingRemote) applyRemote(pendingRemote); }
+  });
+  // live sync: on open, on tab-focus, and every minute
+  refresh();
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") refresh(); });
+  setInterval(() => { if(document.visibilityState === "visible") refresh(); }, POLL_MS);
 }
 document.addEventListener("DOMContentLoaded", init);
 

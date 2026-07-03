@@ -1,0 +1,606 @@
+{
+  "version": 1,
+  "title": "Ireland & Scotland",
+  "subtitle": "A 17-day family journey · July 2026",
+  "meta": "Dublin — Wild Atlantic Way — Scotland",
+  "days": [
+    {
+      "calOnly": true,
+      "dateNum": 2,
+      "dow": "Thu",
+      "place": "Boston → air",
+      "segments": {
+        "morning": [],
+        "lunch": [],
+        "afternoon": [],
+        "dinner": [],
+        "evening": [
+          {
+            "time": "11:45p",
+            "text": "✈ DL 154 BOS→DUB",
+            "status": "booked"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 1,
+      "dateNum": 3,
+      "dow": "Fri",
+      "place": "Dublin",
+      "stay": {
+        "name": "The Fleet Temple Bar Hotel",
+        "note": "check in",
+        "short": "The Fleet Temple Bar"
+      },
+      "segments": {
+        "morning": [
+          {
+            "time": "10:45a",
+            "text": "Arrive Dublin Airport (DL 154)",
+            "status": "booked"
+          }
+        ],
+        "lunch": [
+          {
+            "text": "To the hotel · lunch in Temple Bar",
+            "status": "plan"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Trinity College (self-guided)",
+            "status": "plan"
+          },
+          {
+            "time": "2:30p",
+            "text": "Book of Kells",
+            "status": "booked"
+          }
+        ],
+        "dinner": [
+          {
+            "time": "6:00p",
+            "text": "Gallagher's Boxty House",
+            "status": "booked"
+          }
+        ],
+        "evening": [
+          {
+            "text": "The Stag's Head via Dame St",
+            "status": "plan"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 2,
+      "dateNum": 4,
+      "dow": "Sat",
+      "place": "Dublin",
+      "segments": {
+        "morning": [
+          {
+            "text": "Self-guided Dublin tour",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "time": "2:00p",
+            "text": "Guinness Storehouse — Academy",
+            "status": "booked"
+          }
+        ],
+        "dinner": [
+          {
+            "time": "6:15p",
+            "text": "The Church Café & Bar",
+            "status": "booked"
+          }
+        ],
+        "evening": [
+          {
+            "text": "Irish music show (time TBD)",
+            "status": "plan"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 3,
+      "dateNum": 5,
+      "dow": "Sun",
+      "place": "Howth",
+      "segments": {
+        "morning": [
+          {
+            "text": "DART to Howth · cliff walk",
+            "status": "plan"
+          }
+        ],
+        "lunch": [
+          {
+            "text": "Pier-side fish & chips",
+            "status": "plan"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Hike with Jennie & Christie",
+            "status": "plan"
+          }
+        ],
+        "dinner": [],
+        "evening": []
+      }
+    },
+    {
+      "daynum": 4,
+      "dateNum": 6,
+      "dow": "Mon",
+      "place": "Dublin → Cork",
+      "stay": {
+        "name": "Blarney Caravan & Camping Park",
+        "note": "check in",
+        "short": "Blarney"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Pick up 6-berth campervan",
+            "status": "booked"
+          }
+        ],
+        "lunch": [
+          {
+            "text": "Drive: Wicklow Mountains stop",
+            "status": "plan"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Drive via Wexford & Waterford",
+            "status": "plan"
+          }
+        ],
+        "dinner": [],
+        "evening": [
+          {
+            "time": "11:30p",
+            "text": "Gavin Class (→2:30a)",
+            "status": "class"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 5,
+      "dateNum": 7,
+      "dow": "Tue",
+      "place": "Cork",
+      "segments": {
+        "morning": [
+          {
+            "time": "9:00a",
+            "text": "Blarney Castle & Stone",
+            "status": "booked"
+          }
+        ],
+        "lunch": [
+          {
+            "text": "English Market, Cork City",
+            "status": "plan"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Cobh Titanic tour",
+            "status": "plan"
+          }
+        ],
+        "dinner": [],
+        "evening": []
+      }
+    },
+    {
+      "daynum": 6,
+      "dateNum": 8,
+      "dow": "Wed",
+      "place": "Killarney",
+      "stay": {
+        "name": "Fossa Caravan Park",
+        "note": "check in",
+        "short": "Fossa"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Torc Waterfall",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "text": "Muckross House & Gardens",
+            "status": "plan"
+          }
+        ],
+        "dinner": [
+          {
+            "text": "Murphy's Bar",
+            "status": "plan"
+          }
+        ],
+        "evening": [
+          {
+            "time": "11:30p",
+            "text": "Gavin Class (→2:30a)",
+            "status": "class"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 7,
+      "dateNum": 9,
+      "dow": "Thu",
+      "place": "Ring of Kerry → Dingle",
+      "stay": {
+        "name": "Dingle Skellig Hotel",
+        "note": "check in",
+        "short": "Dingle Skellig"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Ring of Kerry (anti-clockwise)",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "text": "Continue Ring · drive to Dingle",
+            "status": "plan"
+          }
+        ],
+        "dinner": [],
+        "evening": []
+      }
+    },
+    {
+      "daynum": 8,
+      "dateNum": 10,
+      "dow": "Fri",
+      "place": "Dingle",
+      "segments": {
+        "morning": [
+          {
+            "time": "9:30a",
+            "text": "Sea kayaking — Dingle Irish Adv.",
+            "status": "booked"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "text": "Slea Head Drive (clockwise)",
+            "status": "plan"
+          }
+        ],
+        "dinner": [
+          {
+            "text": "The Dingle Pub",
+            "status": "plan"
+          }
+        ],
+        "evening": [
+          {
+            "text": "Pub crawl in Dingle town",
+            "status": "plan"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 9,
+      "dateNum": 11,
+      "dow": "Sat",
+      "place": "Clare / Galway",
+      "stay": {
+        "name": "Galway Bay Hotel",
+        "note": "check in",
+        "short": "Galway Bay"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Cliffs of Moher walk",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "text": "Drive to Galway",
+            "status": "plan"
+          }
+        ],
+        "dinner": [
+          {
+            "text": "Paudie's Bar",
+            "status": "plan"
+          }
+        ],
+        "evening": [
+          {
+            "text": "Trad music in Doolin",
+            "status": "plan"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 10,
+      "dateNum": 12,
+      "dow": "Sun",
+      "place": "Inis Mór",
+      "segments": {
+        "morning": [
+          {
+            "time": "10:30a",
+            "text": "Ferry Rossaveel → Inis Mór",
+            "status": "booked"
+          }
+        ],
+        "lunch": [
+          {
+            "text": "Lunch on the island",
+            "status": "plan"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Bike the island",
+            "status": "plan"
+          },
+          {
+            "time": "5:00p",
+            "text": "Ferry back to Rossaveel",
+            "status": "booked"
+          }
+        ],
+        "dinner": [],
+        "evening": []
+      }
+    },
+    {
+      "daynum": 11,
+      "dateNum": 13,
+      "dow": "Mon",
+      "place": "Connemara",
+      "stay": {
+        "name": "Connemara Camper Park",
+        "note": "check in",
+        "short": "Connemara"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Hike Diamond Hill",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "time": "2:30p",
+            "text": "Coasteering (→5p)",
+            "status": "booked"
+          }
+        ],
+        "dinner": [],
+        "evening": [
+          {
+            "time": "11:30p",
+            "text": "Gavin Class (→2:30a)",
+            "status": "class"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 12,
+      "dateNum": 14,
+      "dow": "Tue",
+      "place": "Sligo",
+      "stay": {
+        "name": "Strandhill Caravan Park",
+        "note": "check in",
+        "short": "Strandhill"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Drive to Sligo · Benbulben",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [
+          {
+            "text": "Benbulben / family visit",
+            "status": "plan"
+          }
+        ],
+        "dinner": [
+          {
+            "text": "Family visit",
+            "status": "plan"
+          }
+        ],
+        "evening": []
+      }
+    },
+    {
+      "daynum": 13,
+      "dateNum": 15,
+      "dow": "Wed",
+      "place": "Sligo",
+      "segments": {
+        "morning": [],
+        "lunch": [
+          {
+            "time": "12:00p",
+            "text": "Surf lesson — Sligo Surf Exp.",
+            "status": "booked"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Surf (→2p) · explore Carrowkeel",
+            "status": "plan"
+          }
+        ],
+        "dinner": [],
+        "evening": [
+          {
+            "time": "11:30p",
+            "text": "Gavin Class (→2:30a)",
+            "status": "class"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 14,
+      "dateNum": 16,
+      "dow": "Thu",
+      "place": "Sligo → St Andrews",
+      "stay": {
+        "name": "VRBO Rental, South Street",
+        "note": "check in",
+        "short": "VRBO"
+      },
+      "segments": {
+        "morning": [
+          {
+            "time": "5:00a",
+            "text": "Depart Sligo",
+            "status": "plan"
+          },
+          {
+            "time": "8:00a",
+            "text": "Drop off motorhome",
+            "status": "booked"
+          }
+        ],
+        "lunch": [
+          {
+            "time": "~12p",
+            "text": "Flight Dublin → Edinburgh",
+            "status": "tobook"
+          }
+        ],
+        "afternoon": [
+          {
+            "time": "~2p",
+            "text": "Train → Leuchars / St Andrews",
+            "status": "tobook"
+          }
+        ],
+        "dinner": [],
+        "evening": [
+          {
+            "text": "Arrive St Andrews",
+            "status": "plan"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 15,
+      "dateNum": 17,
+      "dow": "Fri",
+      "place": "St Andrews",
+      "segments": {
+        "morning": [
+          {
+            "text": "St Andrews — free day",
+            "status": "plan"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [],
+        "dinner": [],
+        "evening": []
+      }
+    },
+    {
+      "daynum": 16,
+      "dateNum": 18,
+      "dow": "Sat",
+      "place": "St Andrews → Edinburgh",
+      "stay": {
+        "name": "Novotel Edinburgh",
+        "note": "check in",
+        "short": "Novotel Edinburgh"
+      },
+      "segments": {
+        "morning": [
+          {
+            "text": "Morning in St Andrews",
+            "status": "plan"
+          }
+        ],
+        "lunch": [
+          {
+            "text": "Train Leuchars → Edinburgh",
+            "status": "tobook"
+          }
+        ],
+        "afternoon": [
+          {
+            "text": "Explore Edinburgh",
+            "status": "plan"
+          }
+        ],
+        "dinner": [],
+        "evening": [
+          {
+            "time": "8:45p",
+            "text": "Underground Ghost Tour",
+            "status": "booked"
+          }
+        ]
+      }
+    },
+    {
+      "daynum": 17,
+      "dateNum": 19,
+      "dow": "Sun",
+      "place": "Edinburgh → Home",
+      "segments": {
+        "morning": [
+          {
+            "time": "9:00a",
+            "text": "Edinburgh Airport — fly home",
+            "status": "booked"
+          }
+        ],
+        "lunch": [],
+        "afternoon": [],
+        "dinner": [],
+        "evening": []
+      }
+    }
+  ],
+  "flight": {
+    "title": "✈ Delta DL 154 · Boston → Dublin",
+    "detail": "Depart Logan 11:45 PM ET, Thu Jul 2 · Arrive Dublin 10:45 AM IST, Fri Jul 3"
+  },
+  "footer": "Segments: Morning 8–11 · Lunch 11–1 · Afternoon 1–5 · Dinner 5–6 · Evening 6–11. All times local (UTC+1 in July)."
+}

@@ -1,5 +1,5 @@
 {
-  "version": 1783153069928,
+  "version": 1783158960370,
   "title": "Ireland & Scotland",
   "subtitle": "A 17-day family journey · July 2026",
   "meta": "Dublin — Wild Atlantic Way — Scotland",
@@ -101,6 +101,11 @@
             "time": "2:00p",
             "text": "Guinness Storehouse — Academy",
             "status": "booked"
+          },
+          {
+            "text": "Meet up with Jenny and Christie ",
+            "status": "plan",
+            "time": "2:00-4:00"
           }
         ],
         "dinner": [
@@ -138,10 +143,6 @@
         ],
         "afternoon": [
           {
-            "text": "Meet up with Jennie & Christie",
-            "status": "plan"
-          },
-          {
             "text": "Hike?",
             "status": "plan"
           }
@@ -161,12 +162,7 @@
         "short": "Blarney"
       },
       "segments": {
-        "morning": [
-          {
-            "text": "Pick up 6-berth campervan",
-            "status": "booked"
-          }
-        ],
+        "morning": [],
         "lunch": [
           {
             "text": "Drive: Wicklow Mountains stop",
@@ -176,7 +172,13 @@
         "afternoon": [
           {
             "text": "Drive via Wexford & Waterford",
-            "status": "plan"
+            "status": "plan",
+            "time": "2-5p"
+          },
+          {
+            "text": "Pick up Campervan",
+            "status": "booked",
+            "time": "2:00"
           }
         ],
         "dinner": [],

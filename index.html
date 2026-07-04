@@ -835,7 +835,10 @@ const FILE  = "trip.json";
 const BRANCH = "main";
 const KEY  = "trip-ireland-scotland-2026";   // localStorage: {base, trip}
 const TKEY = "gh-token-ireland-scotland";     // localStorage: shared write token
-const POLL_MS = 60000;
+const POLL_MS = 45000;
+// Read the shared doc straight from the commit (reflects a Save in seconds,
+// no GitHub Pages rebuild needed). Falls back to the Pages-hosted copy.
+const RAW_URL = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + BRANCH + "/" + FILE;
 
 const SEGS = [
   {key:"morning",   label:"Morning",   range:"8–11a", abbr:"M"},
@@ -952,11 +955,15 @@ function mergeSegments(baseT, mineT, theirsT){
 
 /* ---------- remote sync ---------- */
 async function refresh(){
-  try{
-    const r = await fetch(FILE + "?t=" + Date.now(), {cache:"no-store"});
-    if(!r.ok) return;
-    applyRemote(await r.json());
-  }catch(err){ /* offline: keep local */ }
+  const urls = [ RAW_URL + "?t=" + Date.now(), FILE + "?t=" + Date.now() ];
+  for(let i = 0; i < urls.length; i++){
+    try{
+      const r = await fetch(urls[i], {cache:"no-store"});
+      if(!r.ok) continue;
+      applyRemote(await r.json());
+      return;
+    }catch(err){ /* try next source, else keep local */ }
+  }
 }
 function applyRemote(remote){
   if(!remote || typeof remote.version !== "number") return;

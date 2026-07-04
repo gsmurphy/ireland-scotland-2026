@@ -1,5 +1,5 @@
 {
-  "version": 1783088942220,
+  "version": 1783153069928,
   "title": "Ireland & Scotland",
   "subtitle": "A 17-day family journey · July 2026",
   "meta": "Dublin — Wild Atlantic Way — Scotland",
@@ -88,6 +88,11 @@
           {
             "text": "Self-guided Dublin tour",
             "status": "plan"
+          },
+          {
+            "text": "Coffee, Tea, & Pastries (C,C,L)",
+            "status": "plan",
+            "time": "9:00"
           }
         ],
         "lunch": [],

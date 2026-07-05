@@ -1,5 +1,5 @@
 {
-  "version": 1783158960370,
+  "version": 1783286466558,
   "title": "Ireland & Scotland",
   "subtitle": "A 17-day family journey · July 2026",
   "meta": "Dublin — Wild Atlantic Way — Scotland",
@@ -162,23 +162,34 @@
         "short": "Blarney"
       },
       "segments": {
-        "morning": [],
-        "lunch": [
+        "morning": [
           {
-            "text": "Drive: Wicklow Mountains stop",
-            "status": "plan"
+            "text": "Coffee with Jennie ",
+            "status": "booked",
+            "time": "10:30"
           }
         ],
+        "lunch": [],
         "afternoon": [
-          {
-            "text": "Drive via Wexford & Waterford",
-            "status": "plan",
-            "time": "2-5p"
-          },
           {
             "text": "Pick up Campervan",
             "status": "booked",
             "time": "2:00"
+          },
+          {
+            "text": "Stop in Wicklow mountains ",
+            "status": "plan",
+            "time": "3:00 - 4:00"
+          },
+          {
+            "text": "Drive through Waterford ",
+            "status": "plan",
+            "time": "5:00"
+          },
+          {
+            "text": "Arrive at Blarney Camper Site ",
+            "status": "booked",
+            "time": "6:00"
           }
         ],
         "dinner": [],
